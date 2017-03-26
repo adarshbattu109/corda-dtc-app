@@ -151,7 +151,7 @@ public class DTCApi {
     	final Party otherParty = services.partyFromName("BankOfAmsterdam");
         System.out.println("Counter party......."+otherParty);
         //this line will be removed. we only broadcast to target participant 
-        final Party anotherParty = services.partyFromName("BankOfHelsinki");
+        //final Party anotherParty = services.partyFromName("BankOfHelsinki");
 
         if (otherParty == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -166,11 +166,12 @@ public class DTCApi {
                 purchaseOrder,
                 services.nodeIdentity().getLegalIdentity(),
                 otherParty, 
-                anotherParty,
+                //anotherParty,
                 new PurchaseOrderContract());        
         // The line below blocks and waits for the flow to return.
         final DTCFlow.DTCFlowResult result = services
-                .startFlowDynamic(DTCFlow.Initiator.class, state, otherParty, anotherParty)
+                //.startFlowDynamic(DTCFlow.Initiator.class, state, otherParty, anotherParty)
+                .startFlowDynamic(DTCFlow.Initiator.class, state, otherParty)
                 .getReturnValue()
                 .toBlocking()
                 .first();        

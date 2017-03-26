@@ -35,20 +35,20 @@ public class PurchaseOrderState implements DealState {
     private final PurchaseOrderNew purchaseOrder;
     private final Party buyer;
     private final Party seller;
-    private final Party anotherParty;
+    //private final Party anotherParty;
     private final PurchaseOrderContract contract;
     private final UniqueIdentifier linearId;
 
     public PurchaseOrderState(PurchaseOrderNew purchaseOrder,
                               Party buyer,
                               Party seller,
-                              Party anotherParty,
+                              //Party anotherParty,
                               PurchaseOrderContract contract)
     {
         this.purchaseOrder = purchaseOrder;
         this.buyer = buyer;
         this.seller = seller;
-        this.anotherParty = anotherParty;
+        //this.anotherParty = anotherParty;
         this.contract = contract;
         this.linearId = new UniqueIdentifier(
                 purchaseOrder.getPurchaseOrderNum(),
@@ -61,7 +61,8 @@ public class PurchaseOrderState implements DealState {
     @Override public PurchaseOrderContract getContract() { return contract; }
     @Override public UniqueIdentifier getLinearId() { return linearId; }
     @Override public String getRef() { return linearId.getExternalId(); }
-    @Override public List<Party> getParties() { return Arrays.asList(buyer, seller, anotherParty); }
+    //@Override public List<Party> getParties() { return Arrays.asList(buyer, seller, anotherParty); }
+    @Override public List<Party> getParties() { return Arrays.asList(buyer, seller); }
     @Override public List<CompositeKey> getParticipants() {
         return getParties()
                 .stream()
