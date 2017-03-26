@@ -29,10 +29,7 @@ public class DTCFlow {
 
         private final PurchaseOrderState purchaseOrderState;
         private final Party otherParty;
-        //private final Party anotherParty;
-        // The progress tracker checkpoints each stage of the flow and outputs the specified messages when each
-        // checkpoint is reached in the code. See the 'progressTracker.currentStep' expressions within the call()
-        // function.
+        
         private final ProgressTracker progressTracker = new ProgressTracker(
                 CONSTRUCTING_OFFER,
                 SENDING_OFFER_AND_RECEIVING_PARTIAL_TRANSACTION,
@@ -57,13 +54,7 @@ public class DTCFlow {
                 "Recording transaction in vault.");
         private static final ProgressTracker.Step SENDING_FINAL_TRANSACTION = new ProgressTracker.Step(
                 "Sending fully signed transaction to seller.");
-
       
-        /*public Initiator(PurchaseOrderState purchaseOrderState, Party otherParty, Party anotherParty) {
-            this.purchaseOrderState = purchaseOrderState;
-            this.otherParty = otherParty;
-            this.anotherParty = anotherParty;
-        }*/
         public Initiator(PurchaseOrderState purchaseOrderState, Party otherParty) {
             this.purchaseOrderState = purchaseOrderState;
             this.otherParty = otherParty;            
@@ -78,8 +69,7 @@ public class DTCFlow {
         @Override public DTCFlowResult call() {
         	
         	System.out.println("Flow started by Initiator...........");
-        	// Naively, wrapped the whole flow in a try ... catch block so we can
-            // push the exceptions back through the web API.
+        	
             try {
 
                 final KeyPair myKeyPair = getServiceHub().getLegalIdentityKey();
@@ -90,38 +80,19 @@ public class DTCFlow {
                 final TransactionBuilder utx = purchaseOrderState.generateAgreement(notary);
 
                 final Instant currentTime = getServiceHub().getClock().instant();
-                utx.setTime(currentTime, Duration.ofSeconds(30));                
-                
+                utx.setTime(currentTime, Duration.ofSeconds(30));               
 
                 final SignedTransaction signWithA = utx.signWith(myKeyPair).toSignedTransaction(false);
-
-                //****************NodeB**************
+                
                 final SignedTransaction signWithB = this.sendAndReceive(SignedTransaction.class, otherParty , signWithA).unwrap(data -> data);
-
-                //final WireTransaction wtxWithB = signWithB.verifySignatures(notaryPubKey,this.otherParty.getOwningKey(), this.anotherParty.getOwningKey());
+                
                 final WireTransaction wtxWithB = signWithB.verifySignatures(notaryPubKey,this.otherParty.getOwningKey());
                 
                 wtxWithB.toLedgerTransaction(getServiceHub()).verify();
 
-
-                //***************NodeC**************
-                
-                //UntrustworthyData<SignedTransaction> untrustworthyData = this.sendAndReceive(SignedTransaction.class, anotherParty , signWithB);
-                //UntrustworthyData<SignedTransaction> untrustworthyData = this.sendAndReceive(SignedTransaction.class, otherParty, signWithB);
-                //final SignedTransaction signWithC = untrustworthyData.unwrap(data -> data);
-
-                //final SignedTransaction signWithC = this.sendAndReceive(SignedTransaction.class, anotherParty , signWithB).unwrap(data -> data);
-
-                //final WireTransaction wtxWitC = signWithC.verifySignatures(notaryPubKey,this.otherParty.getOwningKey());
-                
-                //wtxWitC.toLedgerTransaction(getServiceHub()).verify();
-
-                //******************************
-
                 final Set<Party> participants = ImmutableSet.of(getServiceHub().getMyInfo().getLegalIdentity(), otherParty);
                 // FinalityFlow() notarises the transaction and records it in each party's vault.
                 subFlow(new FinalityFlow(signWithB, participants),false);
-
 
                 return new DTCFlowResult.Success(String.format("Transaction id %s committed to ledger.", signWithB.getId()));
 
@@ -168,20 +139,14 @@ public class DTCFlow {
         @Override public DTCFlowResult call() {
         	try {
         		System.out.println("Acceptor [" + getServiceHub().getMyInfo().getLegalIdentity() +"] received request.............");
-                // Prep.
-                // Obtain a reference to our key pair.
+                
                 final KeyPair keyPair = getServiceHub().getLegalIdentityKey();
 
                 // Obtain a reference to the notary we want to use and its public key.
                 final Party notary = single(getServiceHub().getNetworkMapCache().getNotaryNodes()).getNotaryIdentity();
                 final CompositeKey notaryPubKey = notary.getOwningKey();
 
-                //final Party partyC = getServiceHub().getIdentityService().partyFromName("NodeC");
-
                 final SignedTransaction utx = this.receive(SignedTransaction.class, otherParty).unwrap(data -> data );
-
-                //final WireTransaction wtx = utx.verifySignatures(CryptoUtilities.getComposite(keyPair.getPublic()), notaryPubKey, partyC.getOwningKey());
-                //wtx.toLedgerTransaction(getServiceHub()).verify();
 
                 final DigitalSignature.WithKey mySig = CryptoUtilities.signWithECDSA(keyPair, utx.getTx().getId().getBytes());
                 final SignedTransaction vtx = utx.plus(mySig);
