@@ -50,13 +50,13 @@ public class DTCPlugin extends CordaPluginRegistry {
      * This map also acts as a white list. If a flow is invoked via the API and not registered correctly
      * here, then the flow state machine will _not_ invoke the flow. Instead, an exception will be raised.
      */
-   /* private final Map<String, Set<String>> requiredFlows = Collections.singletonMap(
+   private final Map<String, Set<String>> requiredFlows = Collections.singletonMap(
             DTCFlow.Initiator.class.getName(),
             new HashSet<>(Arrays.asList(
                     PurchaseOrderState.class.getName(),
                     Party.class.getName()
-            )));*/
-    
+            )));
+  /**  
   //Putting the above two flows into a single map
     Map<String, Set<String>> requiredFlows = new HashMap<String, Set<String>>();
    //instance block
@@ -68,7 +68,7 @@ public class DTCPlugin extends CordaPluginRegistry {
         )));
     	requiredFlows.put(IssuerFlow.IssuanceRequester.class.getName(), new HashSet<>(Arrays.asList(Amount.class.getName(), Party.class.getName(), OpaqueBytes.class.getName(), Party.class.getName())));
     	
-    }
+    }*/
 
     /**
      * A list of long lived services to be hosted within the node. Typically you would use these to register flow

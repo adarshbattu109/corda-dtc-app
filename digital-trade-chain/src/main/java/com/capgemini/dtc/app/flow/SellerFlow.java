@@ -1,10 +1,15 @@
 package com.capgemini.dtc.app.flow;
 
 import java.security.KeyPair;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.corda.contracts.CommercialPaper;
 import net.corda.core.contracts.Amount;
+import net.corda.core.contracts.Issued;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.crypto.CompositeKey;
 import net.corda.core.crypto.Party;
@@ -15,6 +20,7 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.ProgressTracker;
 import net.corda.flows.TwoPartyTradeFlow;
 import co.paralleluniverse.fibers.Suspendable;
+
 
 public class SellerFlow extends FlowLogic<SignedTransaction> {
 
@@ -88,6 +94,21 @@ public class SellerFlow extends FlowLogic<SignedTransaction> {
 	@Suspendable
 	public StateAndRef<CommercialPaper.State> selfIssueSomeCommercialPaper(
 			CompositeKey ownedBy, NodeInfo notaryNode) {
+		
+		// Make a fake company that's issued its own paper.
+		KeyPair keyPair = net.corda.core.crypto.CryptoUtilities.generateKeyPair();
+		Party party = new Party("Bank of London", keyPair.getPublic());		
+		
+		Currency currency = Currency.getInstance("USD");
+		//Issued issued = new Issued(DUMMY_CASH_ISSUER, currency);
+		
+		//Map<String,Map<String,String>> initStringStringMap = new Map<String,Map<String,String>>{'one' => new Map<String, String>{'a'=>'b', 'c'=> 'd'}, 'two' =>new Map<String, String> {'e'=>'f', 'g'=> 'h'} };
+		
+		Amount<Issued<Currency>> amount = null;		
+		
+		new CommercialPaper().generateIssue(party.ref(new Byte((byte)1)), amount, Instant.now().plus(Duration.ofDays(10)), notaryNode.getNotaryIdentity());
+		
+		
 
 		return null;
 

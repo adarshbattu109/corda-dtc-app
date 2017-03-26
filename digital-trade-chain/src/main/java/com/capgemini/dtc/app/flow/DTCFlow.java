@@ -16,6 +16,7 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.transactions.WireTransaction;
 import net.corda.core.utilities.ProgressTracker;
+import net.corda.core.utilities.UntrustworthyData;
 import net.corda.flows.FinalityFlow;
 import co.paralleluniverse.fibers.Suspendable;
 
@@ -71,6 +72,8 @@ public class DTCFlow {
          */
         @Suspendable
         @Override public DTCFlowResult call() {
+        	
+        	System.out.println("Flow started by Initiator...........");
         	// Naively, wrapped the whole flow in a try ... catch block so we can
             // push the exceptions back through the web API.
             try {
@@ -97,8 +100,11 @@ public class DTCFlow {
 
 
                 //*****************************
+                
+                UntrustworthyData<SignedTransaction> untrustworthyData = this.sendAndReceive(SignedTransaction.class, anotherParty , signWithB);
+                final SignedTransaction signWithC = untrustworthyData.unwrap(data -> data);
 
-                final SignedTransaction signWithC = this.sendAndReceive(SignedTransaction.class, anotherParty , signWithB).unwrap(data -> data);
+                //final SignedTransaction signWithC = this.sendAndReceive(SignedTransaction.class, anotherParty , signWithB).unwrap(data -> data);
 
                 final WireTransaction wtxWitC = signWithC.verifySignatures(notaryPubKey,this.anotherParty.getOwningKey(),this.otherParty.getOwningKey());
                 

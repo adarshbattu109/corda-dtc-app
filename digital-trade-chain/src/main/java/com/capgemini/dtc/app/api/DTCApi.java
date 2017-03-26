@@ -147,9 +147,11 @@ public class DTCApi {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createPurchaseOrder(PurchaseOrderNew purchaseOrder, @PathParam("party") String partyName) throws InterruptedException, ExecutionException {
     	System.out.println(purchaseOrder);
-        final Party otherParty = services.partyFromName(partyName);
+        //final Party otherParty = services.partyFromName(partyName);
+    	final Party otherParty = services.partyFromName("BankOfAmsterdam");
+        System.out.println("Counter party......."+otherParty);
         //this line will be removed. we only broadcast to target participant 
-        final Party anotherParty = services.partyFromName("ABBFederalBank");
+        final Party anotherParty = services.partyFromName("BankOfHelsinki");
 
         if (otherParty == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
