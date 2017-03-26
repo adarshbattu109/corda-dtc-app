@@ -3,7 +3,6 @@ package com.capgemini.dtc.app.api;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +33,7 @@ import com.capgemini.dtc.app.state.PurchaseOrderState;
 import com.capgemini.dtc.app.util.DatabaseUtil;
 import com.capgemini.dtc.app.util.StringUtil;
 
-// This API is accessible from /api/example. All paths specified below are relative to it.
+// This API is accessible from /api/dtc. All paths specified below are relative to it.
 @Path("dtc")
 public class DTCApi {
     private final CordaRPCOps services;
@@ -72,7 +71,7 @@ public class DTCApi {
     }
 
     /**
-     * Displays all purchase order states that exist in the vault.
+     * Return all purchase order specific to a 'userId'.
      */
     @GET
     @Path("{userId}/purchase-orders")
@@ -94,16 +93,12 @@ public class DTCApi {
     			returnRecords.add(state.getPurchaseOrder());
     		}
     	}
-    	// return only one record based on date which is created last
-    	//PurchaseOrderNew lastPOCreation = Collections.max(returnRecords, Comparator.comparing(PurchaseOrderNew::getPoDate));
-    	
-    	//returnRecords.clear();
-    	//returnRecords.add(lastPOCreation);
-    	
-        //return services.vaultAndUpdates().getFirst();
     	return returnRecords;
     }
     
+    /**
+     * Return the purchase order based on 'poNumber'.
+     */
     @GET
     @Path("{poNumber}/get-po-details")
     @Produces(MediaType.APPLICATION_JSON)
@@ -133,34 +128,20 @@ public class DTCApi {
     }
 
     /**
-     * This should only be called from the 'buyer' node. It initiates a flow to agree a purchase order with a
-     * seller. Once the flow finishes it will have written the purchase order to ledger. Both the buyer and the
-     * seller will be able to see it when calling /api/example/purchase-orders on their respective nodes.
-     *
-     * This end-point takes a Party name parameter as part of the path. If the serving node can't find the other party
-     * in its network map cache, it will return an HTTP bad request.
-     *
-     * The flow is invoked asynchronously. It returns a future when the flow's call() method returns.
+     * This will create new purchase order     
      */
     @PUT
     @Path("{party}/create-purchase-order")
     @Produces(MediaType.APPLICATION_JSON)
     public Response createPurchaseOrder(PurchaseOrderNew purchaseOrder, @PathParam("party") String partyName) throws InterruptedException, ExecutionException {
     	System.out.println(purchaseOrder);
-        //final Party otherParty = services.partyFromName(partyName);
+        
     	final Party otherParty = services.partyFromName("BankOfAmsterdam");
-        System.out.println("Counter party......."+otherParty);
-        //this line will be removed. we only broadcast to target participant 
-        //final Party anotherParty = services.partyFromName("BankOfHelsinki");
+        System.out.println("Counter party......."+otherParty);       
 
         if (otherParty == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
-        }        
-        /*final PurchaseOrderState state = new PurchaseOrderState(
-                purchaseOrder,
-                services.nodeIdentity().getLegalIdentity(),
-                otherParty,
-                new PurchaseOrderContract());*/
+        }       
         purchaseOrder.setPoDate(new Date());
         final PurchaseOrderState state = new PurchaseOrderState(
                 purchaseOrder,
