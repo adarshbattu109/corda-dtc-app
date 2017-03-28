@@ -227,7 +227,8 @@
                         },
                         success: function (data) {
                             alert('Account is registered successfully.');
-                            window.location.href = "Login.htm";
+                            //window.location.href = "Login.htm";
+                            redirectUser("Login.htm?userID=" + $("#txtUsername").val());
                         },
                         error: function (errMsg) {
                             debugger;
